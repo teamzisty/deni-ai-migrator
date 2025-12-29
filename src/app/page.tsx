@@ -1,15 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Download, LogIn, LogOut } from "lucide-react";
+import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
@@ -41,10 +36,10 @@ export default function Home() {
         password,
       });
       if (error) {
-        setAuthMessage(error.message);
+        setAuthMessage(error.message ?? "Sign in failed.");
         return;
       }
-    setAuthMessage("Signed in.");
+      setAuthMessage("Signed in.");
     } finally {
       setIsSigningIn(false);
     }
