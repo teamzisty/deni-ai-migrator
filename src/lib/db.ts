@@ -30,7 +30,13 @@ function normalizeLegacyMessages(value: unknown): LegacyMessage[] {
   return [];
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function fetchLegacyChatsByUserId(userId: string): Promise<LegacyChatSession[]> {
+  if (!UUID_RE.test(userId)) {
+    return [];
+  }
+
   const pool = getMasterPool();
   const result = await pool.query(
     `SELECT id, title, created_at AS "createdAt", updated_at AS "updatedAt", messages
