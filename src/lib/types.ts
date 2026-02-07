@@ -21,9 +21,7 @@ export type LegacyChatSession = {
   messages: LegacyMessage[];
 };
 
-export type UIPart =
-  | { type: "text"; text: string }
-  | { type: "image_url"; url: string };
+export type UIPart = { type: "text"; text: string } | { type: "image_url"; url: string };
 
 export type UIMessage = {
   id: string;

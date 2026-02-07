@@ -18,14 +18,7 @@ function Separator({
   );
 
   if (decorative) {
-    return (
-      <div
-        role="presentation"
-        aria-hidden="true"
-        className={classes}
-        {...props}
-      />
-    );
+    return <div role="presentation" aria-hidden="true" className={classes} {...props} />;
   }
 
   return <hr aria-orientation={orientation} className={classes} {...props} />;

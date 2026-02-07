@@ -12,10 +12,7 @@ function getPool(connectionString: string | undefined, label: string) {
 
 export function getMasterPool() {
   if (!masterPool) {
-    masterPool = getPool(
-      process.env.MASTER_DATABASE_URL ?? process.env.DATABASE_URL,
-      "MASTER",
-    );
+    masterPool = getPool(process.env.MASTER_DATABASE_URL ?? process.env.DATABASE_URL, "MASTER");
   }
   return masterPool;
 }
@@ -33,9 +30,7 @@ function normalizeLegacyMessages(value: unknown): LegacyMessage[] {
   return [];
 }
 
-export async function fetchLegacyChatsByUserId(
-  userId: string,
-): Promise<LegacyChatSession[]> {
+export async function fetchLegacyChatsByUserId(userId: string): Promise<LegacyChatSession[]> {
   const pool = getMasterPool();
   const result = await pool.query(
     `SELECT id, title, created_at AS "createdAt", updated_at AS "updatedAt", messages

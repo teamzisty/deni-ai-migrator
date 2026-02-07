@@ -9,10 +9,7 @@ export const runtime = "nodejs";
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    return NextResponse.json(
-      { status: "error", message: "Unauthorized" },
-      { status: 401 },
-    );
+    return NextResponse.json({ status: "error", message: "Unauthorized" }, { status: 401 });
   }
 
   const chats = await fetchLegacyChatsByUserId(session.user.id);

@@ -7,7 +7,7 @@ function Alert({ className, ...props }: React.ComponentProps<"div">) {
     <div
       role="alert"
       className={cn(
-        "relative w-full rounded-lg border border-border/60 bg-card px-4 py-3 text-sm text-card-foreground shadow-sm",
+        "relative w-full rounded-md border bg-card px-3.5 py-2.5 text-sm text-card-foreground",
         className,
       )}
       {...props}
@@ -16,24 +16,12 @@ function Alert({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function AlertTitle({ className, ...props }: React.ComponentProps<"h5">) {
-  return (
-    <h5
-      className={cn("mb-1 text-sm font-semibold leading-none", className)}
-      {...props}
-    />
-  );
+  // oxlint-disable-next-line jsx-a11y/heading-has-content -- content provided via spread props
+  return <h5 className={cn("mb-0.5 text-sm font-medium leading-none tracking-tight", className)} {...props} />;
 }
 
-function AlertDescription({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  );
+function AlertDescription({ className, ...props }: React.ComponentProps<"div">) {
+  return <div className={cn("text-[13px] text-muted-foreground", className)} {...props} />;
 }
 
 export { Alert, AlertTitle, AlertDescription };
