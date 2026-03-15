@@ -1,8 +1,15 @@
 "use client";
 
-import { CheckCircle2, Download, Github, LogOut, Mail } from "lucide-react";
-import { useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Download,
+  Github,
+  LoaderCircle,
+  LogOut,
+  Mail,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,13 +20,48 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
+
+function getOAuthErrorMessage(error: string | null) {
+  if (error === "signup_disabled") {
+    return "User not found";
+  }
+  if (!error) {
+    return null;
+  }
+  return error
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function getMessageTone(message: string) {
+  if (
+    message === "Signing..." ||
+    message === "Connecting..." ||
+    message === "Loading..."
+  ) {
+    return "loading";
+  }
+  if (
+    message === "Signed in." ||
+    message === "Signed out." ||
+    message === "downloaded"
+  ) {
+    return "success";
+  }
+  return "error";
+}
 
 export default function Home() {
   const [isExporting, setIsExporting] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [socialProvider, setSocialProvider] = useState<"google" | "github" | null>(null);
+  const [socialProvider, setSocialProvider] = useState<
+    "google" | "github" | null
+  >(null);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -27,6 +69,25 @@ export default function Home() {
 
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const isAuthenticated = Boolean(session?.user);
+  const authTone = authMessage ? getMessageTone(authMessage) : null;
+  const exportTone = exportMessage ? getMessageTone(exportMessage) : null;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    const message = getOAuthErrorMessage(error);
+
+    if (!message) {
+      return;
+    }
+
+    setAuthMessage(message);
+    params.delete("error");
+    params.delete("error_description");
+    const query = params.toString();
+    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    window.history.replaceState({}, "", nextUrl);
+  }, []);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -82,7 +143,9 @@ export default function Home() {
       }
       setAuthMessage("Unable to start social sign-in.");
     } catch (error) {
-      setAuthMessage(error instanceof Error ? error.message : "Social sign-in failed.");
+      setAuthMessage(
+        error instanceof Error ? error.message : "Social sign-in failed.",
+      );
     } finally {
       setSocialProvider(null);
     }
@@ -109,7 +172,9 @@ export default function Home() {
       window.URL.revokeObjectURL(url);
       setExportMessage("message.json downloaded.");
     } catch (error) {
-      setExportMessage(error instanceof Error ? error.message : "Export failed.");
+      setExportMessage(
+        error instanceof Error ? error.message : "Export failed.",
+      );
     } finally {
       setIsExporting(false);
     }
@@ -144,7 +209,11 @@ export default function Home() {
                       : "bg-secondary text-secondary-foreground"
                   }`}
                 >
-                  {isAuthenticated ? <CheckCircle2 className="h-3.5 w-3.5" /> : "1"}
+                  {isAuthenticated ? (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  ) : (
+                    "1"
+                  )}
                 </span>
                 <div>
                   <CardTitle>Authenticate</CardTitle>
@@ -214,7 +283,9 @@ export default function Home() {
                           fill="#EA4335"
                         />
                       </svg>
-                      {socialProvider === "google" ? "Connecting..." : "Continue with Google"}
+                      {socialProvider === "google"
+                        ? "Connecting..."
+                        : "Continue with Google"}
                     </Button>
                     <Button
                       type="button"
@@ -224,7 +295,9 @@ export default function Home() {
                       disabled={isSigningIn || socialProvider !== null}
                     >
                       <Github className="h-4 w-4" />
-                      {socialProvider === "github" ? "Connecting..." : "Continue with GitHub"}
+                      {socialProvider === "github"
+                        ? "Connecting..."
+                        : "Continue with GitHub"}
                     </Button>
                   </div>
 
@@ -280,11 +353,43 @@ export default function Home() {
                   </Button>
                 </div>
               )}
-              {authMessage && (
-                <Alert>
-                  <AlertTitle>Auth</AlertTitle>
-                  <AlertDescription>{authMessage}</AlertDescription>
-                </Alert>
+              {authMessage && authTone && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "relative overflow-hidden rounded-xl border px-3.5 py-3 shadow-sm transition-all",
+                    "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-1",
+                    authTone === "success" &&
+                      "bg-emerald-100 dark:bg-emerald-900",
+                    authTone === "error" && "bg-rose-100 dark:bg-rose-900",
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "flex shrink-0 items-center justify-center",
+                        authTone === "success" &&
+                          "border-emerald-200 bg-emerald-100/80 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300",
+                        authTone === "error" &&
+                          "border-rose-200 bg-rose-100/80 text-rose-700 dark:border-rose-800 dark:bg-rose-900/60 dark:text-rose-300",
+                      )}
+                    >
+                      {authTone === "loading" ? (
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                      ) : authTone === "success" ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium tracking-tight">
+                        {authMessage}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -302,7 +407,9 @@ export default function Home() {
                 </span>
                 <div>
                   <CardTitle>Export Data</CardTitle>
-                  <CardDescription>Download chat history as JSON</CardDescription>
+                  <CardDescription>
+                    Download chat history as JSON
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -317,11 +424,43 @@ export default function Home() {
                 {isExporting ? "Exporting..." : "Download message.json"}
               </Button>
 
-              {exportMessage && (
-                <Alert>
-                  <AlertTitle>Export</AlertTitle>
-                  <AlertDescription>{exportMessage}</AlertDescription>
-                </Alert>
+              {exportMessage && exportTone && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "relative overflow-hidden rounded-xl border px-3.5 py-3 shadow-sm transition-all",
+                    "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-1",
+                    exportTone === "success" &&
+                      "bg-emerald-100 dark:bg-emerald-900",
+                    exportTone === "error" && "bg-rose-100 dark:bg-rose-900",
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "flex shrink-0 items-center justify-center",
+                        exportTone === "success" &&
+                          "border-emerald-200 bg-emerald-100/80 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300",
+                        exportTone === "error" &&
+                          "border-rose-200 bg-rose-100/80 text-rose-700 dark:border-rose-800 dark:bg-rose-900/60 dark:text-rose-300",
+                      )}
+                    >
+                      {exportTone === "loading" ? (
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                      ) : exportTone === "success" ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className=" min-w-0">
+                      <p className="text-[13px] font-medium tracking-tight">
+                        {exportMessage}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
