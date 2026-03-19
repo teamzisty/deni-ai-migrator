@@ -194,6 +194,33 @@ export default function Home() {
           <p className="text-[13px] leading-relaxed tracking-tight text-muted-foreground">
             Sign in to export your legacy chat data.
           </p>
+
+          <div
+            role="status"
+            aria-live="polite"
+            className={cn(
+              "mt-4 relative overflow-hidden rounded-xl border px-3.5 py-3 shadow-sm transition-all",
+              "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-1",
+              "bg-rose-100 dark:bg-rose-900",
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  "flex shrink-0 items-center justify-center",
+                  "border-rose-200 bg-rose-100/80 text-rose-700 dark:border-rose-800 dark:bg-rose-900/60 dark:text-rose-300",
+                )}
+              >
+                <AlertCircle className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium tracking-tight">
+                  Deni AI Migration ends on April 1, and legacy data will be
+                  deleted. Please export your data by April 1 if needed.
+                </p>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Steps */}
